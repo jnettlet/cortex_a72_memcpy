@@ -11,7 +11,7 @@
  *
  */
 
-#include "../asmdefs.h"
+#include "asmdefs.h"
 
 #define dstin	x0
 #define src	x1
@@ -53,7 +53,7 @@
    The loop tail is handled by always copying 64 bytes from the end.
 */
 
-ENTRY_ALIAS (__memmove_aarch64)
+ENTRY_ALIAS (memcpy)
 ENTRY (__memcpy_aarch64)
 	PTR_ARG (0)
 	PTR_ARG (1)
