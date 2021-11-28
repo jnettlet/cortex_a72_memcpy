@@ -1,0 +1,20 @@
+Description: Adds necessary makefile changes.
+
+--- libmemcpy-a72-0.1.orig/Makefile
++++ libmemcpy-a72-0.1/Makefile
+@@ -1,5 +1,3 @@
+-.PHONY : clean
+-
+ CPPFLAGS= -fPIC -g -fno-inline -fno-builtin-inline -fno-inline-functions -fno-builtin
+ LDFLAGS= -shared
+ 
+@@ -13,3 +11,9 @@ all: $(TARGET)
+ 
+ $(TARGET) : $(OBJECTS)
+ 	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
++
++install: $(TARGET)
++	install -D $(TARGET) $(DESTDIR)$(prefix)/lib/aarch64-linux-gnu/$(TARGET)
++
++clean:
++	rm -f $(OBJECTS) $(TARGET)
