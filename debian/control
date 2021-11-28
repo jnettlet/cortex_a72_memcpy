@@ -1,0 +1,13 @@
+Source: libmemcpy-a72
+Section: libs
+Priority: optional
+Maintainer: Liz Fong-Jones <lizf@honeycomb.io>
+Build-Depends: debhelper (>=11~)
+Standards-Version: 4.1.4
+Homepage: https://github.com/jnettlet/cortex_a72_memcpy
+
+Package: libmemcpy-a72
+Architecture: arm64
+Depends: ${misc:Depends}
+Description: memcpy() workarounds for Cortex A72
+ Patches memcpy() from libc in order to avoid memory corruption issue.

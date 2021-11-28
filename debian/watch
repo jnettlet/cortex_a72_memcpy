@@ -1,0 +1,4 @@
+version=4
+opts="filenamemangle=s%(?:.*?)?v?(\d[\d.]*)\.tar\.gz%libmemcpy-a72-$1.tar.gz%" \
+  https://github.com/jnettlet/cortex_a72_memcpy/tags \
+  (?:.*?/)?v?(\d[\d.]*)\.tar\.gz debian uupdate

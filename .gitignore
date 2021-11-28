@@ -1,0 +1,8 @@
+*.o
+*.so
+.pc
+debian/debhelper-build-stamp
+debian/files
+debian/.debhelper
+debian/libmemcpy-a72
+debian/libmemcpy-a72.substvars
