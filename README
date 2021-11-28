@@ -1,0 +1,11 @@
+A simple memcpy replacement that only changes the orderig of
+2 stores in the 96 byte code path in order to fix an issue when
+copying from userspace to memmapped device memory like framebuffers
+or perhaps when using a toolkit like SPDK.
+
+The build is done just by issueing the make command and then you
+can copy the libmemcpy.so to any preferred library path.
+
+The library can be tested by using LD_PRELOAD="./libmemcpy.so" application
+or be made globablly available by adding the full path to the library
+into the file /etc/ld.so.preload.
