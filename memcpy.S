@@ -49,8 +49,9 @@
    The loop tail is handled by always copying 64 bytes from the end.
 */
 
+ENTRY_ALIAS (memmove)
 ENTRY_ALIAS (memcpy)
-ENTRY (__memcpy_aarch64)
+ENTRY (__memcpy_a72)
 	PTR_ARG (0)
 	PTR_ARG (1)
 	SIZE_ARG (2)
@@ -121,8 +122,8 @@ L(copy32_96):
 	/* Copy 65..96 bytes.  */
 L(copy96):
 	ldp	E_l, E_h, [src, 32]
-	stp	A_l, A_h, [dstin]
 	ldp	F_l, F_h, [src, 48]
+	stp	A_l, A_h, [dstin]
 	stp	B_l, B_h, [dstin, 16]
 	stp	E_l, E_h, [dstin, 32]
 	stp	F_l, F_h, [dstin, 48]
@@ -162,7 +163,8 @@ L(loop64):
 	stp	C_l, C_h, [dst, 48]
 	ldp	C_l, C_h, [src, 48]
 	stp	D_l, D_h, [dst, 64]!
-	ldp	D_l, D_h, [src, 64]!
+	ldp	D_l, D_h, [src, 64]
+	add	src, src, 64
 	subs	count, count, 64
 	b.hi	L(loop64)
 
@@ -195,7 +197,8 @@ L(copy_long_backwards):
 	stp	D_l, D_h, [dstend, -16]
 	ldp	B_l, B_h, [srcend, -32]
 	ldp	C_l, C_h, [srcend, -48]
-	ldp	D_l, D_h, [srcend, -64]!
+	ldp	D_l, D_h, [srcend, -64]
+	sub	srcend, srcend, 64
 	sub	dstend, dstend, tmp1
 	subs	count, count, 128
 	b.ls	L(copy64_from_start)
@@ -208,7 +211,8 @@ L(loop64_backwards):
 	stp	C_l, C_h, [dstend, -48]
 	ldp	C_l, C_h, [srcend, -48]
 	stp	D_l, D_h, [dstend, -64]!
-	ldp	D_l, D_h, [srcend, -64]!
+	ldp	D_l, D_h, [srcend, -64]
+	sub	srcend, srcend, 64
 	subs	count, count, 64
 	b.hi	L(loop64_backwards)
 
@@ -228,5 +232,5 @@ L(copy64_from_start):
 	stp	F_l, F_h, [dstin, 48]
 	ret
 
-END (__memcpy_aarch64)
+END (__memcpy_a72)
 
