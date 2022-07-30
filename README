@@ -9,3 +9,47 @@ can copy the libmemcpy.so to any preferred library path.
 The library can be tested by using LD_PRELOAD="./libmemcpy.so" application
 or be made globablly available by adding the full path to the library
 into the file /etc/ld.so.preload.
+
+We are now pretty equivalent or faster than glibc's memcpy and Arm's optimized
+library memcpy on the optimized library's memcpy benchmark. For the cortex-a72
+we are definitely providing the best performance.
+
+Random memcpy (bytes/ns):
+          __memcpy_a72 32K: 2.74 64K: 2.41 128K: 2.20 256K: 2.04 512K: 1.73 1024K: 1.47 avg 2.01
+      __memcpy_aarch64 32K: 2.65 64K: 2.40 128K: 2.22 256K: 2.04 512K: 1.74 1024K: 1.49 avg 2.01
+ __memcpy_aarch64_simd 32K: 2.64 64K: 2.39 128K: 2.21 256K: 2.06 512K: 1.75 1024K: 1.50 avg 2.02
+                memcpy 32K: 2.58 64K: 2.32 128K: 2.16 256K: 2.00 512K: 1.72 1024K: 1.47 avg 1.97
+           memcpy_call 32K: 2.72 64K: 2.42 128K: 2.22 256K: 2.06 512K: 1.75 1024K: 1.48 avg 2.02
+
+Aligned medium memcpy (bytes/ns):
+          __memcpy_a72 8B: 1.95 16B: 4.40 32B: 8.79 64B: 12.80 128B: 12.79 256B: 15.58 512B: 16.55 
+      __memcpy_aarch64 8B: 1.35 16B: 2.93 32B: 5.86 64B: 10.83 128B: 11.73 256B: 15.57 512B: 16.56 
+ __memcpy_aarch64_simd 8B: 1.35 16B: 2.93 32B: 5.86 64B: 11.73 128B: 11.73 256B: 14.81 512B: 16.08 
+                memcpy 8B: 1.17 16B: 2.51 32B: 5.03 64B: 9.38 128B: 11.73 256B: 15.21 512B: 16.32 
+           memcpy_call 8B: 1.60 16B: 3.52 32B: 7.04 64B: 11.73 128B: 11.73 256B: 15.21 512B: 16.32 
+
+Unaligned medium memcpy (bytes/ns):
+          __memcpy_a72 8B: 1.95 16B: 4.40 32B: 8.80 64B: 8.46 128B: 10.42 256B: 13.05 512B: 14.24 
+      __memcpy_aarch64 8B: 1.91 16B: 4.40 32B: 8.80 64B: 8.40 128B: 7.42 256B: 13.06 512B: 14.24 
+ __memcpy_aarch64_simd 8B: 1.83 16B: 4.40 32B: 8.80 64B: 8.77 128B: 7.22 256B: 10.62 512B: 10.99 
+                memcpy 8B: 1.55 16B: 3.52 32B: 7.03 64B: 9.35 128B: 7.77 256B: 11.94 512B: 14.24 
+           memcpy_call 8B: 1.60 16B: 3.52 32B: 7.04 64B: 9.60 128B: 7.70 256B: 10.99 512B: 12.94 
+
+Large memcpy (bytes/ns):
+          __memcpy_a72 1K: 17.06 2K: 17.32 4K: 16.99 8K: 17.26 16K: 17.11 32K: 15.01 64K: 12.32 
+      __memcpy_aarch64 1K: 17.06 2K: 17.31 4K: 16.99 8K: 17.24 16K: 17.13 32K: 15.04 64K: 12.32 
+ __memcpy_aarch64_simd 1K: 16.80 2K: 17.19 4K: 16.83 8K: 16.98 16K: 16.96 32K: 14.73 64K: 12.21 
+                memcpy 1K: 16.93 2K: 17.25 4K: 16.96 8K: 17.25 16K: 16.90 32K: 14.99 64K: 12.32 
+           memcpy_call 1K: 16.93 2K: 17.25 4K: 16.96 8K: 17.20 16K: 16.80 32K: 15.00 64K: 12.32 
+
+Unaligned forwards memmove (bytes/ns):
+          __memcpy_a72 1K: 16.10 2K: 16.80 4K: 16.65 8K: 17.04 16K: 16.61 32K: 14.61 64K: 11.96 
+      __memcpy_aarch64 1K: 16.09 2K: 16.78 4K: 16.62 8K: 17.03 16K: 16.62 32K: 14.60 64K: 11.96 
+ __memcpy_aarch64_simd 1K: 10.76 2K: 10.69 4K: 10.63 8K: 10.63 16K: 10.43 32K: 9.94 64K: 10.10 
+                memcpy 1K: 15.89 2K: 16.63 4K: 16.66 8K: 17.04 16K: 16.20 32K: 14.47 64K: 11.98 
+
+Unaligned backwards memmove (bytes/ns):
+          __memcpy_a72 1K: 15.80 2K: 16.68 4K: 16.48 8K: 17.01 16K: 16.70 32K: 14.64 64K: 11.69 
+      __memcpy_aarch64 1K: 16.15 2K: 16.68 4K: 16.59 8K: 17.05 16K: 16.68 32K: 14.65 64K: 11.67 
+ __memcpy_aarch64_simd 1K: 11.96 2K: 12.07 4K: 11.98 8K: 12.11 16K: 12.02 32K: 11.54 64K: 11.05 
+                memcpy 1K: 15.95 2K: 16.72 4K: 16.70 8K: 17.14 16K: 16.08 32K: 14.06 64K: 6.54 
