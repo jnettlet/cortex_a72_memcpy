@@ -13,6 +13,8 @@
 
 #include "asmdefs.h"
 
+#define SKIP_ZVA_CHECK
+
 #define dstin	x0
 #define val	x1
 #define valw	w1
@@ -105,6 +107,8 @@ L(no_zva):
 	sub	count, dstend, dst	/* Count is 16 too large.  */
 	sub	dst, dst, 16		/* Dst is biased by -32.  */
 	sub	count, count, 64 + 16	/* Adjust count and bias for loop.  */
+
+	.p2align 4
 L(no_zva_loop):
 	add	dst, dst, 64
 	stp	q0, q0, [dst, -32]

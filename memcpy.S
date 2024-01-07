@@ -56,9 +56,9 @@ ENTRY (__memcpy_a72)
 	PTR_ARG (1)
 	SIZE_ARG (2)
 	add	srcend, src, count
-	add	dstend, dstin, count
 	cmp	count, 96
 	b.hi	L(copy_long)
+	add	dstend, dstin, count
 	cmp	count, 32
 	b.hi	L(copy32_96)
 
@@ -71,6 +71,22 @@ ENTRY (__memcpy_a72)
 	stp	D_l, D_h, [dstend, -16]
 	ret
 
+	.p2align 4
+	/* Medium copies: 33..96 bytes.  */
+L(copy32_96):
+	ldp	A_l, A_h, [src]
+	ldp	B_l, B_h, [src, 16]
+	ldp	C_l, C_h, [srcend, -32]
+	ldp	D_l, D_h, [srcend, -16]
+	cmp	count, 64
+	b.hi	L(copy96)
+	stp	A_l, A_h, [dstin]
+	stp	B_l, B_h, [dstin, 16]
+	stp	C_l, C_h, [dstend, -32]
+	stp	D_l, D_h, [dstend, -16]
+	ret
+
+	.p2align 3
 	/* Copy 8-15 bytes.  */
 L(copy16):
 	tbz	count, 3, L(copy8)
@@ -79,8 +95,9 @@ L(copy16):
 	str	A_l, [dstin]
 	str	A_h, [dstend, -8]
 	ret
+	nop
+	nop
 
-	.p2align 3
 	/* Copy 4-7 bytes.  */
 L(copy8):
 	tbz	count, 2, L(copy4)
@@ -88,6 +105,20 @@ L(copy8):
 	ldr	B_lw, [srcend, -4]
 	str	A_lw, [dstin]
 	str	B_lw, [dstend, -4]
+	ret
+	nop
+	nop
+
+	/* Copy 65..96 bytes.  */
+L(copy96):
+	ldp	E_l, E_h, [src, 32]
+	ldp	F_l, F_h, [src, 48]
+	stp	A_l, A_h, [dstin]
+	stp	B_l, B_h, [dstin, 16]
+	stp	E_l, E_h, [dstin, 32]
+	stp	F_l, F_h, [dstin, 48]
+	stp	C_l, C_h, [dstend, -32]
+	stp	D_l, D_h, [dstend, -16]
 	ret
 
 	/* Copy 0..3 bytes using a branchless sequence.  */
@@ -103,37 +134,11 @@ L(copy4):
 L(copy0):
 	ret
 
-	.p2align 4
-	/* Medium copies: 33..128 bytes.  */
-L(copy32_96):
-	ldp	A_l, A_h, [src]
-	ldp	B_l, B_h, [src, 16]
-	ldp	C_l, C_h, [srcend, -32]
-	ldp	D_l, D_h, [srcend, -16]
-	cmp	count, 64
-	b.hi	L(copy96)
-	stp	A_l, A_h, [dstin]
-	stp	B_l, B_h, [dstin, 16]
-	stp	C_l, C_h, [dstend, -32]
-	stp	D_l, D_h, [dstend, -16]
-	ret
-
-	.p2align 4
-	/* Copy 65..96 bytes.  */
-L(copy96):
-	ldp	E_l, E_h, [src, 32]
-	ldp	F_l, F_h, [src, 48]
-	stp	A_l, A_h, [dstin]
-	stp	B_l, B_h, [dstin, 16]
-	stp	E_l, E_h, [dstin, 32]
-	stp	F_l, F_h, [dstin, 48]
-	stp	C_l, C_h, [dstend, -32]
-	stp	D_l, D_h, [dstend, -16]
-	ret
-
-	.p2align 4
+	.p2align 3
 	/* Copy more than 128 bytes.  */
 L(copy_long):
+	add     dstend, dstin, count
+
 	/* Use backwards copy if there is an overlap.  */
 	sub	tmp1, dstin, src
 	cbz	tmp1, L(copy0)
@@ -155,6 +160,7 @@ L(copy_long):
 	subs	count, count, 128 + 16	/* Test and readjust count.  */
 	b.ls	L(copy64_from_end)
 
+	.p2align 4
 L(loop64):
 	stp	A_l, A_h, [dst, 16]
 	ldp	A_l, A_h, [src, 16]
@@ -162,8 +168,9 @@ L(loop64):
 	ldp	B_l, B_h, [src, 32]
 	stp	C_l, C_h, [dst, 48]
 	ldp	C_l, C_h, [src, 48]
-	stp	D_l, D_h, [dst, 64]!
+	stp	D_l, D_h, [dst, 64]
 	ldp	D_l, D_h, [src, 64]
+	add	dst, dst, 64
 	add	src, src, 64
 	subs	count, count, 64
 	b.hi	L(loop64)
@@ -185,7 +192,6 @@ L(copy64_from_end):
 	ret
 
 	.p2align 4
-
 	/* Large backwards copy for overlapping copies.
 	   Copy 16 bytes and then align dst to 16-byte alignment.  */
 L(copy_long_backwards):
@@ -203,6 +209,7 @@ L(copy_long_backwards):
 	subs	count, count, 128
 	b.ls	L(copy64_from_start)
 
+	.p2align 4
 L(loop64_backwards):
 	stp	A_l, A_h, [dstend, -16]
 	ldp	A_l, A_h, [srcend, -16]
